@@ -12,8 +12,12 @@ for (const path of paths) {
   assert.ok(!html.includes('pdi@aiacontext.com'), `Stale contact in ${path}`);
   for (const match of html.matchAll(/(?:src|poster|href)=["'](\/[^"'#?]*)["']/g)) {
     const ref = match[1];
-    if (ref === '/' || ref.startsWith('//')) continue;
+    if (ref === '/' || ref.startsWith('//') || ref.includes('${')) continue;
     await access(resolve('dist', ref.slice(1) + (/\.[a-z0-9]+$/i.test(ref) ? '' : '.html')));
   }
 }
+const publications = await readFile(resolve('public/insights/publications.js'), 'utf8');
+const insightSlugs = [...publications.matchAll(/\{slug:"([^"]+)"/g)].map(match => match[1]);
+assert.equal(insightSlugs.length, 9, 'Expected nine insight publications');
+for (const slug of insightSlugs) await access(resolve('dist', `insights/${slug}.html`));
 console.log(`Verified metadata and local links/assets on ${paths.length} pages.`);

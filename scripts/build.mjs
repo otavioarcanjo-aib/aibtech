@@ -7,13 +7,23 @@ import { applySeo } from '../worker/seo.ts';
 const origin = new URL(process.env.SITE_URL || `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL || 'aibtech.vercel.app'}`).origin;
 const out = resolve('dist');
 await mkdir(out, { recursive: true });
-await cp('public', out, { recursive: true, filter: source => source !== 'public/aib.html' });
+await cp('public', out, { recursive: true, filter: source => ![
+  'public/aib.html',
+  'public/insights/index.html',
+  'public/insights/article.html'
+].includes(source) });
 const home = (await readFile('public/aib.html', 'utf8'))
   .replaceAll('__AIB_PHOTO_ANALYSIS__', '/images/aib-analise-tela.webp')
   .replaceAll('__AIB_GRAPHISM__', '/images/aib-grafismo-1-1.png')
   .replaceAll('__SITE_ORIGIN__', origin);
-const pages = new Map([['/', home]]);
-for (const path of ['/solucoes', '/insights']) pages.set(path, renderContentPage(path, home, origin));
+const insights = (await readFile('public/insights/index.html', 'utf8'))
+  .replaceAll('__SITE_ORIGIN__', origin);
+const insightArticle = await readFile('public/insights/article.html', 'utf8');
+const publicationsSource = await readFile('public/insights/publications.js', 'utf8');
+const insightSlugs = [...publicationsSource.matchAll(/\{slug:"([^"]+)"/g)].map(match => match[1]);
+const pages = new Map([['/', home], ['/insights', insights]]);
+pages.set('/solucoes', renderContentPage('/solucoes', home, origin));
+for (const slug of insightSlugs) pages.set(`/insights/${slug}`, insightArticle);
 for (const slug of Object.keys(productPages)) pages.set(`/produtos/${slug}`, renderProductPage(slug, origin));
 for (const [path, html] of pages) {
   if (!html) throw new Error(`Missing page: ${path}`);

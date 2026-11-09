@@ -1,0 +1,30 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>aiBox — Pesquisa aplicada em inteligência artificial</title><meta name="description" content="Publicações e pesquisas do aiBox, laboratório de pesquisa aplicada em inteligência artificial do aiB."><link rel="canonical" href="__SITE_ORIGIN__/insights"><link rel="icon" href="/brand/bee-night.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/insights/insights.css"><link rel="stylesheet" href="/insights/site-shell.css"><meta property="og:title" content="aiBox — Pesquisa aplicada em inteligência artificial"><meta property="og:description" content="Conhecimento, métodos e tecnologias para ampliar o que podemos fazer com IA."><meta property="og:type" content="website"><meta property="og:image" content="__SITE_ORIGIN__/og-aib-v2.png"></head><body>
+<header class="topbar"><div class="wrap header-inner"><a href="/" aria-label="aiB início"><img class="logo" src="/brand/logo-night.png" width="110" height="45" alt="aiB"></a><button class="menu-toggle" aria-expanded="false" aria-controls="navigation">Menu <span aria-hidden="true">☰</span></button><nav class="nav" id="navigation" aria-label="Navegação principal"><a href="/solucoes">Soluções</a><a href="/#sobre">Sobre o aiB</a><a href="/insights" aria-current="page">Insights</a><a href="/#contato" class="button">Vamos conversar <span class="arrow" aria-hidden="true">↗</span></a></nav></div></header>
+<main><div class="hero-wrap"><section class="hero"><div class="wrap hero-inner"><div><img class="aibox-logo" src="/brand/aibox-light.png" alt="aiBox"><p class="eyebrow">Laboratório de pesquisa aplicada</p><h1>Pesquisa em IA que encontra o mundo real.</h1></div><p class="hero-copy">O <strong>aiBox é o laboratório de pesquisa aplicada em inteligência artificial do aiB.</strong> Investigamos problemas relevantes, produzimos evidências e transformamos conhecimento científico em novas possibilidades de tecnologia.</p></div></section></div>
+<section class="publication-list" aria-label="Publicações do aiBox"><div class="wrap"><div id="publication-list"></div><nav class="pagination" id="pagination" aria-label="Páginas de publicações"></nav></div></section><section class="cta"><div class="wrap cta-inner"><h2>Tem um problema que exige pesquisa de verdade?</h2><a class="button" href="/#contato">Vamos conversar →</a></div></section></main>
+<footer class="footer"><div class="wrap footer-inner"><span>© 2026 AIB Technology Solutions.</span><a href="/">Conheça o aiB →</a></div></footer><script src="/insights/publications.js"></script><script>
+const list=document.getElementById('publication-list');
+const pagination=document.getElementById('pagination');
+const pageSize=5;
+const pageCount=Math.ceil(window.AIB_PUBLICATIONS.length/pageSize);
+const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+const publicationMarkup=i=>`<a class="publication" href="/insights/${esc(i.slug)}/" aria-label="Ler: ${esc(i.title)}"><div class="meta"><span class="language">${esc(i.language)}</span><time>${esc(i.date)}</time><span class="authors">${esc(i.authors)}</span></div><div><h3 class="publication-title">${esc(i.title)}</h3><p class="publication-summary">${esc(i.summary)}</p></div><span class="arrow" aria-hidden="true">↗</span></a>`;
+const currentPage=()=>Math.min(pageCount,Math.max(1,Number(new URLSearchParams(location.search).get('pagina'))||1));
+function render(page,{scroll=false}={}){
+  const start=(page-1)*pageSize;
+  list.innerHTML=window.AIB_PUBLICATIONS.slice(start,start+pageSize).map(publicationMarkup).join('');
+  pagination.innerHTML=`<button type="button" data-page="${page-1}" ${page===1?'disabled':''} aria-label="Página anterior">← Anterior</button>${Array.from({length:pageCount},(_,index)=>{const number=index+1;return `<button type="button" class="page-number${number===page?' active':''}" data-page="${number}" ${number===page?'aria-current="page"':''} aria-label="Página ${number}">${number}</button>`}).join('')}<button type="button" data-page="${page+1}" ${page===pageCount?'disabled':''} aria-label="Próxima página">Próxima →</button>`;
+  if(scroll)document.querySelector('.publication-list').scrollIntoView({behavior:'smooth',block:'start'});
+}
+pagination.addEventListener('click',event=>{
+  const button=event.target.closest('button[data-page]');
+  if(!button||button.disabled)return;
+  const page=Number(button.dataset.page);
+  const url=new URL(location.href);
+  page===1?url.searchParams.delete('pagina'):url.searchParams.set('pagina',page);
+  history.pushState({page},'',url);
+  render(page,{scroll:true});
+});
+addEventListener('popstate',()=>render(currentPage()));
+render(currentPage());
+</script><script src="/insights/site-shell.js"></script></body></html>
